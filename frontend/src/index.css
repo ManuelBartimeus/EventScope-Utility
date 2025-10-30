@@ -218,6 +218,13 @@ a {
   color: var(--text-secondary);
 }
 
+.linkedin-redirect-note {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--accent-color);
+  font-style: italic;
+}
+
 .date-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -605,6 +612,45 @@ a {
   font-size: 1.1rem;
 }
 
+.extension-instructions {
+  background: var(--card-background);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  border: 1px solid var(--border-color);
+}
+
+.extension-instructions ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: step-counter;
+}
+
+.extension-instructions li {
+  counter-increment: step-counter;
+  margin-bottom: 0.75rem;
+  padding-left: 2rem;
+  position: relative;
+  color: var(--text-primary);
+}
+
+.extension-instructions li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--primary-color);
+  color: white;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app {
@@ -649,6 +695,263 @@ a {
     opacity: 0;
   }
   100% {
+    opacity: 1;
+  }
+}
+
+/* Chrome Extension Specific Styles */
+.extension-info {
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--accent-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.extension-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.extension-indicator {
+  background: var(--accent-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.last-updated {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.refresh-button {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-button:hover {
+  background-color: var(--bg-tertiary);
+  transform: rotate(180deg);
+}
+
+.event-card.extension-result {
+  border: 2px solid var(--accent-color);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  position: relative;
+}
+
+.extension-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--accent-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.event-location {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+.event-timestamp {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.type-badge.profile {
+  background: linear-gradient(135deg, #0077b5, #005582);
+  color: white;
+}
+
+.go-to-link.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.no-extension-results {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Feed Post Specific Styles */
+.event-card.feed-post {
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  border-left: 4px solid #0077b5;
+}
+
+.post-author {
+  font-weight: 600;
+  color: var(--accent-color);
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.type-badge.feed-post {
+  background: linear-gradient(135deg, #0077b5, #004d7a);
+  color: white;
+}
+
+.post-engagement {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.engagement-item {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.post-id {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+  background: var(--bg-tertiary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+/* Updated extension badge for feed posts */
+.event-card.feed-post .extension-badge {
+  background: linear-gradient(135deg, #0077b5, #004d7a);
+}
+
+/* Debug notice styling */
+.debug-notice {
+  background: #fff3cd;
+  color: #856404;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid #ffeaa7;
+}
+
+/* Chrome Extension Results Styles */
+.extension-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 0.5rem;
+  border: 2px solid #0077b5;
+}
+
+.extension-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.extension-indicator {
+  color: #0077b5;
+  font-weight: 600;
+}
+
+.last-updated {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.refresh-button {
+  background: none;
+  border: none;
+  color: #0077b5;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.refresh-button:hover {
+  background-color: rgba(0, 119, 181, 0.1);
+}
+
+.event-card.extension-result {
+  border: 2px solid #0077b5;
+  position: relative;
+  animation: slideInFromTop 0.5s ease-out;
+}
+
+.extension-badge {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0077b5;
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-weight: 600;
+}
+
+.event-location {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+.event-timestamp {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.type-badge.profile {
+  background: linear-gradient(45deg, #0077b5, #005885);
+  color: white;
+}
+
+.go-to-link.disabled {
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.no-extension-results {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
     opacity: 1;
   }
 }

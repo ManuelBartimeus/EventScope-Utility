@@ -1,6 +1,6 @@
 import { FiHome, FiSearch, FiBookmark } from 'react-icons/fi';
 
-const Sidebar = ({ currentView, onViewChange }) => {
+const Sidebar = ({ currentView, onNavigate }) => {
   const tabs = [
     { id: 'home', label: 'Home', icon: FiHome },
     { id: 'results', label: 'Results', icon: FiSearch },
@@ -18,8 +18,8 @@ const Sidebar = ({ currentView, onViewChange }) => {
           return (
             <button
               key={tab.id}
+              onClick={() => onNavigate(tab.id)}
               className={`nav-tab ${currentView === tab.id ? 'active' : ''}`}
-              onClick={() => onViewChange(tab.id)}
             >
               <Icon className="nav-icon" />
               <span>{tab.label}</span>

@@ -1,33 +1,48 @@
 import { useState } from 'react';
-import DatePicker from 'react-datepicker';
 import { FiFilter, FiSearch } from 'react-icons/fi';
 import FilterModal from './FilterModal';
-import "react-datepicker/dist/react-datepicker.css";
 
-const HomePage = ({ onNavigate }) => {
+const HomePage = () => {
   const [keywords, setKeywords] = useState('');
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
   const [selectedPlatform, setSelectedPlatform] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSearch = () => {
-    if (keywords && startDate && endDate && selectedPlatform) {
-      // Store search data in session storage
+    if (keywords && selectedPlatform) {
+      // Check if LinkedIn is selected and redirect to LinkedIn search
+      if (selectedPlatform === 'linkedin') {
+        // Create LinkedIn search URL with keywords
+        const linkedinSearchUrl = `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(keywords)}`;
+        
+        // Open LinkedIn search in a new tab/window
+        window.open(linkedinSearchUrl, '_blank', 'noopener,noreferrer');
+        
+        // Store search data for potential future use
+        const searchData = {
+          keywords,
+          platform: selectedPlatform,
+          linkedinUrl: linkedinSearchUrl
+        };
+        sessionStorage.setItem('eventscope-search', JSON.stringify(searchData));
+        
+        return; // Exit early for LinkedIn
+      }
+      
+      // For other platforms, store search data and navigate to results
       const searchData = {
         keywords,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
         platform: selectedPlatform
       };
       sessionStorage.setItem('eventscope-search', JSON.stringify(searchData));
-      onNavigate('results');
+      // Navigate to results page by updating URL
+      window.history.pushState({}, '', '/results');
+      window.dispatchEvent(new PopStateEvent('popstate'));
     } else {
-      alert('Please fill in all fields and select a platform');
+      alert('Please enter keywords and select a platform');
     }
   };
 
-  const isSearchDisabled = !keywords || !startDate || !endDate || !selectedPlatform;
+  const isSearchDisabled = !keywords || !selectedPlatform;
 
   return (
     <div className="home-page">
@@ -54,48 +69,23 @@ const HomePage = ({ onNavigate }) => {
           {selectedPlatform && (
             <div className="selected-platform">
               Selected: {selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)}
+              {selectedPlatform === 'linkedin' && (
+                <div className="linkedin-redirect-note">
+                  🔗 Will open LinkedIn search in new tab
+                </div>
+              )}
             </div>
           )}
-        </div>
-
-        <div className="date-group">
-          <div className="form-group">
-            <label htmlFor="start-date">Start Date</label>
-            <DatePicker
-              id="start-date"
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-              placeholderText="Select start date"
-              className="date-picker"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="end-date">End Date</label>
-            <DatePicker
-              id="end-date"
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate}
-              placeholderText="Select end date"
-              className="date-picker"
-            />
-          </div>
         </div>
 
         <button
           className={`search-button ${isSearchDisabled ? 'disabled' : ''}`}
           onClick={handleSearch}
           disabled={isSearchDisabled}
+          title={selectedPlatform === 'linkedin' ? 'Open LinkedIn search in new tab' : 'Search for events'}
         >
           <FiSearch />
-          Search Events
+          {selectedPlatform === 'linkedin' ? 'Search on LinkedIn' : 'Search Events'}
         </button>
       </div>
 

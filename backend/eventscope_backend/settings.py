@@ -138,7 +138,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS settings for React frontend
+# CORS settings for React frontend and Chrome extension
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -146,7 +146,27 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
 ]
 
+# Allow Chrome extensions (they use chrome-extension:// protocol)
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^chrome-extension://.*$",
+    r"^moz-extension://.*$",  # Firefox extensions
+]
+
 CORS_ALLOW_CREDENTIALS = True
+
+# Allow all headers for Chrome extension requests
+CORS_ALLOW_ALL_ORIGINS = False  # Keep this False for security
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Allow localhost for development
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']

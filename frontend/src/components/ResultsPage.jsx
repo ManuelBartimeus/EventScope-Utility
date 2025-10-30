@@ -1,71 +1,53 @@
 import { useState, useEffect } from 'react';
-import { FiExternalLink, FiBookmark, FiSearch } from 'react-icons/fi';
+import { FiExternalLink, FiBookmark, FiSearch, FiRefreshCw } from 'react-icons/fi';
 import { FaLinkedin, FaTwitter, FaFacebook, FaInstagram } from 'react-icons/fa';
 
 const ResultsPage = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const [searchData, setSearchData] = useState(null);
   const [savedEvents, setSavedEvents] = useState([]);
+  const [extensionResults, setExtensionResults] = useState([]);
+  const [showExtensionData, setShowExtensionData] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [isLoadingExtensionData, setIsLoadingExtensionData] = useState(false);
 
-  // Dummy results data
-  const dummyResults = [
-    {
-      id: 1,
-      name: "Tech Innovation Summit 2024",
-      type: "online",
-      description: "Join industry leaders discussing the latest technological innovations and future trends in AI, blockchain, and sustainable tech solutions.",
-      link: "https://example.com/tech-summit",
-      platform: "linkedin"
-    },
-    {
-      id: 2,
-      name: "Digital Marketing Conference",
-      type: "onsite",
-      description: "Learn cutting-edge digital marketing strategies from top professionals. Network with marketing experts and discover new tools.",
-      link: "https://example.com/marketing-conf",
-      platform: "facebook"
-    },
-    {
-      id: 3,
-      name: "Startup Pitch Competition",
-      type: "online",
-      description: "Watch emerging startups pitch their innovative ideas to investors. Interactive Q&A sessions and networking opportunities included.",
-      link: "https://example.com/pitch-comp",
-      platform: "twitter"
-    },
-    {
-      id: 4,
-      name: "Web Development Bootcamp",
-      type: "onsite",
-      description: "Intensive hands-on workshop covering modern web development frameworks, best practices, and career advancement strategies.",
-      link: "https://example.com/web-bootcamp",
-      platform: "linkedin"
-    },
-    {
-      id: 5,
-      name: "AI & Machine Learning Symposium",
-      type: "online",
-      description: "Explore the latest advances in artificial intelligence and machine learning with research presentations and practical workshops.",
-      link: "https://example.com/ai-symposium",
-      platform: "twitter"
-    },
-    {
-      id: 6,
-      name: "Sustainable Business Forum",
-      type: "onsite",
-      description: "Discuss sustainable business practices, environmental impact, and corporate responsibility with industry experts.",
-      link: "https://example.com/sustainable-forum",
-      platform: "facebook"
-    },
-    {
-      id: 7,
-      name: "Creative Photography Workshop",
-      type: "online",
-      description: "Learn advanced photography techniques, editing tips, and creative composition from professional photographers. Share your work and get feedback.",
-      link: "https://example.com/photo-workshop",
-      platform: "instagram"
+
+
+  // Fetch extension results from backend
+  const fetchExtensionResults = async () => {
+    try {
+      setIsLoadingExtensionData(true);
+      const response = await fetch('http://localhost:8000/api/events/results/get/');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.results && data.results.length > 0) {
+          setExtensionResults(data.results);
+          setShowExtensionData(true);
+          setLastUpdated(new Date(data.timestamp));
+          console.log('Extension results loaded:', data.results.length, 'items');
+        } else {
+          // If no extension results, clear data
+          setExtensionResults([]);
+          setShowExtensionData(false);
+          console.log('No extension results found');
+        }
+      }
+    } catch (error) {
+      console.log('No extension data available:', error);
+    } finally {
+      setIsLoadingExtensionData(false);
     }
-  ];
+  };
+
+  // Poll for new extension data
+  useEffect(() => {
+    // Initial check for extension data
+    fetchExtensionResults();
+    
+    // Poll every 3 seconds for new data (more frequent for better responsiveness)
+    const pollInterval = setInterval(fetchExtensionResults, 3000);
+    
+    return () => clearInterval(pollInterval);
+  }, []);
 
   useEffect(() => {
     // Get search data from session storage
@@ -79,13 +61,6 @@ const ResultsPage = () => {
     if (storedSaved) {
       setSavedEvents(JSON.parse(storedSaved));
     }
-
-    // Simulate loading for 4 seconds
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 4000);
-
-    return () => clearTimeout(timer);
   }, []);
 
   const getPlatformIcon = (platform) => {
@@ -112,7 +87,120 @@ const ResultsPage = () => {
     sessionStorage.setItem('eventscope-saved', JSON.stringify(newSavedEvents));
   };
 
-  if (isLoading) {
+  const refreshExtensionData = () => {
+    fetchExtensionResults();
+  };
+
+  // Render extension results (both search results and feed posts)
+  const renderExtensionResults = () => {
+    if (!extensionResults || extensionResults.length === 0) return null;
+
+    return extensionResults.map((result, index) => {
+      // Check if this is a feed post or search result
+      const isFeedPost = result.type === 'feed_post';
+      
+      return (
+        <div key={result.id || index} className={`event-card extension-result ${isFeedPost ? 'feed-post' : ''}`}>
+          <div className="event-header">
+            <div className="platform-icon">
+              <FaLinkedin style={{ color: '#0077B5' }} />
+            </div>
+            <div className="extension-badge">
+              <span>{isFeedPost ? 'Feed Post' : 'Profile'}</span>
+            </div>
+            <button
+              className={`save-button ${savedEvents.includes(result.id) ? 'saved' : ''}`}
+              onClick={() => toggleSaveEvent(result.id)}
+              title={savedEvents.includes(result.id) ? 'Remove from saved' : `Save ${isFeedPost ? 'post' : 'profile'}`}
+            >
+              <FiBookmark />
+            </button>
+          </div>
+          
+          <div className="event-content">
+            {isFeedPost ? (
+              // Feed Post Layout
+              <>
+                <h3 className="event-name">Feed Post</h3>
+                {result.author && (
+                  <p className="post-author">by {result.author}</p>
+                )}
+                <div className="event-type">
+                  <span className="type-badge feed-post">
+                    LinkedIn Post
+                  </span>
+                </div>
+                {result.description && (
+                  <p className="event-description">{result.description}</p>
+                )}
+                <div className="post-engagement">
+                  <span className="engagement-item">
+                    👍 {result.likes || 0} likes
+                  </span>
+                  <span className="engagement-item">
+                    💬 {result.comments || 0} comments
+                  </span>
+                  {result.reposts > 0 && (
+                    <span className="engagement-item">
+                      🔄 {result.reposts} reposts
+                    </span>
+                  )}
+                </div>
+              </>
+            ) : (
+              // Profile Layout (existing)
+              <>
+                <h3 className="event-name">{result.name || 'LinkedIn Profile'}</h3>
+                <div className="event-type">
+                  <span className="type-badge profile">
+                    LinkedIn Profile
+                  </span>
+                </div>
+                <p className="event-description">
+                  {result.description || result.subtitle || 'LinkedIn profile extracted from search results'}
+                </p>
+                {result.location && (
+                  <p className="event-location">📍 {result.location}</p>
+                )}
+              </>
+            )}
+            
+            {result.extractedAt && (
+              <p className="event-timestamp">
+                Extracted: {new Date(result.extractedAt).toLocaleString()}
+              </p>
+            )}
+          </div>
+
+          <div className="event-footer">
+            {!isFeedPost && result.link && result.link !== '#' ? (
+              <a
+                href={result.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="go-to-link"
+              >
+                <FiExternalLink />
+                View Profile
+              </a>
+            ) : isFeedPost && result.urn ? (
+              <span className="post-id">
+                Post ID: {result.urn.split(':').pop()}
+              </span>
+            ) : (
+              <span className="go-to-link disabled">
+                <FiExternalLink />
+                {isFeedPost ? 'LinkedIn Post' : 'Profile Link Not Available'}
+              </span>
+            )}
+          </div>
+        </div>
+      );
+    });
+  };
+
+  // Show loading only for extension data fetching
+  if (isLoadingExtensionData) {
     return (
       <div className="loading-container">
         <div className="loading-animation">
@@ -123,7 +211,7 @@ const ResultsPage = () => {
             <div className="spinner"></div>
           </div>
         </div>
-        <p>Searching for events...</p>
+        <p>Loading LinkedIn results...</p>
       </div>
     );
   }
@@ -134,52 +222,61 @@ const ResultsPage = () => {
         <h2>Search Results</h2>
         {searchData && (
           <p className="search-info">
-            Results for "{searchData.keywords}" from {new Date(searchData.startDate).toLocaleDateString()} 
-            to {new Date(searchData.endDate).toLocaleDateString()}
+            Results for "{searchData.keywords}" 
+            {searchData.startDate && searchData.endDate && 
+              ` from ${new Date(searchData.startDate).toLocaleDateString()} to ${new Date(searchData.endDate).toLocaleDateString()}`
+            }
           </p>
+        )}
+        
+        {showExtensionData && (
+          <div className="extension-info">
+            <div className="extension-status">
+              <span className="extension-indicator">🔍 Chrome Extension Data</span>
+              {lastUpdated && (
+                <span className="last-updated">
+                  Last updated: {lastUpdated.toLocaleTimeString()}
+                </span>
+              )}
+              <button 
+                className="refresh-button" 
+                onClick={refreshExtensionData}
+                title="Refresh extension data"
+              >
+                <FiRefreshCw />
+              </button>
+            </div>
+            {extensionResults.length > 0 && extensionResults[0].type === 'fallback' && (
+              <div className="debug-notice">
+                ⚠️ Debug Mode: Showing fallback content. Check browser console for extraction details.
+              </div>
+            )}
+          </div>
         )}
       </div>
 
       <div className="results-grid">
-        {dummyResults.map(event => (
-          <div key={event.id} className="event-card">
-            <div className="event-header">
-              <div className="platform-icon">
-                {getPlatformIcon(event.platform)}
-              </div>
-              <button
-                className={`save-button ${savedEvents.includes(event.id) ? 'saved' : ''}`}
-                onClick={() => toggleSaveEvent(event.id)}
-                title={savedEvents.includes(event.id) ? 'Remove from saved' : 'Save event'}
-              >
-                <FiBookmark />
-              </button>
-            </div>
-            
-            <div className="event-content">
-              <h3 className="event-name">{event.name}</h3>
-              <div className="event-type">
-                <span className={`type-badge ${event.type}`}>
-                  {event.type === 'online' ? 'Online' : 'On-site'}
-                </span>
-              </div>
-              <p className="event-description">{event.description}</p>
-            </div>
-
-            <div className="event-footer">
-              <a
-                href={event.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="go-to-link"
-              >
-                <FiExternalLink />
-                Go to Link
-              </a>
+        {/* Show extension results if available */}
+        {showExtensionData && renderExtensionResults()}
+      </div>
+      
+      {!showExtensionData && (
+        <div className="no-extension-results">
+          <div className="empty-state">
+            <FiSearch className="empty-icon" />
+            <h3>No Results Yet</h3>
+            <p>Use the Chrome extension to scrape LinkedIn data and see results here.</p>
+            <div className="extension-instructions">
+              <ol>
+                <li>Go to LinkedIn (search results or feed)</li>
+                <li>Click the EventScope extension icon</li>
+                <li>Click "Start Scraping"</li>
+                <li>Results will appear here automatically</li>
+              </ol>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
